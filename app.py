@@ -51,11 +51,30 @@ def main():
             return Response("undefined", status=400)
 
         elif stock:
-            url = f"https://query1.finance.yahoo.com/v7/finance/quote?symbols={stock}"
-            headers = {'User-Agent': 'Mozilla/5.0'}
-            res = requests.get(url, headers=headers, timeout=5).json()
-            val = res['quoteResponse']['result'][0]['regularMarketPrice']
-            return Response(json.dumps(val), mimetype='application/json')
+            url = f"https://query2.finance.yahoo.com/v8/finance/chart/{stock}?interval=1m&range=1d"
+            
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'Accept': 'application/json'
+            }
+            
+            try:
+                res = requests.get(url, headers=headers, timeout=10)
+                
+                if res.status_code == 200:
+                    data = res.json()
+                    result = data.get('chart', {}).get('result')
+                    if result:
+                        meta = result[0].get('meta', {})
+                        val = meta.get('regularMarketPrice')
+                        
+                        if val is not None:
+                            return Response(json.dumps(val), mimetype='application/json')
+            except Exception:
+                pass
+                
+            
+            return Response("undefined", status=400)
 
         elif expression:
             val = simple_eval(expression)
