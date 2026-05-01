@@ -24,8 +24,9 @@ def main():
 
     elif expression:
         try:
-            val = simple_eval(expression)
-            return Response(str(val), mimetype='application/json')
+            safe_expr = expression.replace(' ', '+')
+            result = simple_eval(safe_expr)
+            return Response(str(result), mimetype='application/json')
         except:
             return Response("Error", status=400)
 
